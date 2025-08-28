@@ -1,0 +1,46 @@
+name: Build Signed Android APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Signed APK
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install Cordova
+      run: npm install -g cordova
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Decode keystore
+      run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > landigen.keystore
+
+    - name: Build Android APK
+      run: |
+        cordova platform remove android || true
+        cordova platform add android@14.1.0
+        cordova build android --release \
+          --keystore=landigen.keystore \
+          --storePassword=${{ secrets.KEYSTORE_PASSWORD }} \
+          --alias=${{ secrets.KEY_ALIAS }} \
+          --password=${{ secrets.KEY_PASSWORD }}
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: LandiGen-Signed-APK
+        path: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
