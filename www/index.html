@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandiGen Editor</title>
+<style>
+body{font-family:sans-serif;padding:10px;}
+iframe{width:100%; height:60vh; border:1px solid #ccc;}
+input,button,select{margin:5px 0; width:100%; padding:8px;}
+</style>
+</head>
+<body>
+<h2>Editor de Landing</h2>
+
+<label>Selecciona plantilla:</label>
+<select id="templateSelect">
+  <option value="templates/template1.html">Template 1</option>
+  <option value="templates/template2.html">Template 2</option>
+  <option value="templates/template3.html">Template 3</option>
+</select>
+
+<label>Título:</label>
+<input type="text" id="tituloInput" placeholder="Nuevo título">
+
+<label>Subtítulo:</label>
+<input type="text" id="subtituloInput" placeholder="Nuevo subtítulo">
+
+<label>Enlace de afiliado:</label>
+<input type="text" id="linkInput" placeholder="Tu enlace" value="https://tu-enlace-de-afiliado.com">
+
+<button onclick="actualizar()">Actualizar Landing</button>
+
+<iframe id="preview" src="templates/template1.html"></iframe>
+
+<script>
+function actualizar(){
+  const iframe=document.getElementById('preview').contentWindow.document;
+  iframe.getElementById('titulo').innerText=document.getElementById('tituloInput').value || 'Landing';
+  iframe.getElementById('subtitulo').innerText=document.getElementById('subtituloInput').value || 'Genera tu landing';
+  iframe.getElementById('link').href=document.getElementById('linkInput').value;
+}
+document.getElementById('templateSelect').addEventListener('change', function(){
+  document.getElementById('preview').src=this.value;
+});
+</script>
+</body>
+</html>

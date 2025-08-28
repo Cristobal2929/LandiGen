@@ -1,0 +1,39 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install Cordova
+      run: npm install -g cordova@11
+
+    - name: Install Java JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Add Android platform
+      run: cordova platform add android
+
+    - name: Build APK
+      run: cordova build android --release
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: LandiGen-APK
+        path: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
