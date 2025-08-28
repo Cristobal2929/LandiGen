@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Signed Android APK
 
 on:
   push:
@@ -29,11 +29,23 @@ jobs:
     - name: Add Android platform
       run: cordova platform add android
 
-    - name: Build APK
-      run: cordova build android --release
+    - name: Decode keystore
+      run: echo $KEYSTORE_BASE64 | base64 --decode > landigen.keystore
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
-    - name: Upload APK artifact
+    - name: Build Release APK and Sign
+      run: |
+        cordova build android --release
+        jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1         -keystore landigen.keystore         -storepass $KEYSTORE_PASSWORD         -keypass $KEY_PASSWORD         platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk         $KEY_ALIAS
+        zipalign -v 4 platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk         platforms/android/app/build/outputs/apk/release/LandiGen-signed.apk
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Upload Signed APK
       uses: actions/upload-artifact@v3
       with:
-        name: LandiGen-APK
-        path: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        name: LandiGen-Signed-APK
+        path: platforms/android/app/build/outputs/apk/release/LandiGen-signed.apk
